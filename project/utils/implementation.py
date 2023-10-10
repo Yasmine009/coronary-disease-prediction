@@ -67,7 +67,7 @@ def compute_gradient(y, tx, w):
     d_w0 = (-1)/np.shape(y)[0]*np.sum(e)
     d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
     
-    return np.array([d_wo, d_w1])
+    return np.array([d_w0, d_w1])
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
@@ -121,7 +121,7 @@ def compute_stoch_gradient(y, tx, w):
     d_w0 = (-1)/np.shape(y)[0]*np.sum(e)
     d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
     
-    return np.array([d_wo, d_w1])
+    return np.array([d_w0, d_w1])
 
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
