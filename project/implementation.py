@@ -49,6 +49,33 @@ def compute_loss_rmse(y, tx, w):
     
     return np.sqrt(2*compute_loss_mse(y, tx, w))
 
+def calculate_loss_llh(y, tx, w):
+    """Compute the cost by negative log likelihood.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+
+    Returns:
+        a non-negative loss
+
+    >>> y = np.c_[[0., 1.]]
+    >>> tx = np.arange(4).reshape(2, 2)
+    >>> w = np.c_[[2., 3.]]
+    >>> round(calculate_loss_llh(y, tx, w), 8)
+    1.52429481
+    """
+    assert y.shape[0] == tx.shape[0]
+    assert tx.shape[1] == w.shape[0]
+
+    n = len(y)
+    s = sigmoid(tx.dot(w))
+    loss = - (y.T.dot(np.log(s)) + (1-y).T.dot(np.log(1 - s)))
+        
+    return 1/n * np.squeeze(loss)
+
+
 """
 Gradient Descent
 """
@@ -68,6 +95,31 @@ def compute_gradient(y, tx, w):
     d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
     
     return np.array([d_w0, d_w1])
+
+
+def calculate_gradient_llh(y, tx, w):
+    """Compute the gradient of negative log likelihood loss.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+
+    Returns:
+        a vector of shape (D, 1)
+
+    >>> np.set_printoptions(8)
+    >>> y = np.c_[[0., 1.]]
+    >>> tx = np.arange(6).reshape(2, 3)
+    >>> w = np.array([[0.1], [0.2], [0.3]])
+    >>> calculate_gradient(y, tx, w)
+    array([[-0.10370763],
+           [ 0.2067104 ],
+           [ 0.51712843]])
+    """
+    n = len(y)
+    s = sigmoid(tx.dot(w))
+    return tx.T.dot(s-y)*(1/n)
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
@@ -215,6 +267,48 @@ def ridge_regression(y, tx, lambda_):
     lambda_1 = lambda_*2*tx.shape[0]
     w = np.linalg.inv(np.add((tx.T).dot(tx), lambda_1*np.identity(tx.shape[1]))).dot(tx.T).dot(y)
     return w
+
+
+def logistic regression(y, tx, initial_w, max_iters, gamma)(y, tx, w, gamma):
+    """
+    The logistic gradient descent algorithm.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+        gamma: float
+
+    Returns:
+        losses: np.array
+        w: np.array
+
+    >>> y = np.c_[[0., 1.]]
+    >>> tx = np.arange(6).reshape(2, 3)
+    >>> w = np.array([[0.1], [0.2], [0.3]])
+    >>> gamma = 0.1
+    >>> loss, w = learning_by_gradient_descent(y, tx, w, gamma)
+    >>> round(loss, 8)
+    0.62137268
+    >>> w
+    array([[0.11037076],
+           [0.17932896],
+           [0.24828716]])
+    """
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        
+        loss = calculate_loss_llh(y, tx, w)
+        gradient = calculate_gradient_llh(y, tx, w)
+        w = w - gamma*gradient
+        
+        ws.append(w)
+        losses.append(loss)
+    
+    return ws, losses
 
 
 def load_csv_data(data_path, sub_sample=False):
