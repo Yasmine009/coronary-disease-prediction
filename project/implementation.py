@@ -98,9 +98,7 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         # store w and loss
         ws.append(w)
         losses.append(loss)
-        
-        # Do we return only the last W vector of the iteration ? 
-    
+
     return ws, losses
 
 """
