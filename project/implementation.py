@@ -269,7 +269,7 @@ def ridge_regression(y, tx, lambda_):
     return w
 
 
-def logistic regression(y, tx, initial_w, max_iters, gamma)(y, tx, w, gamma):
+def logistic regression(y, tx, initial_w, max_iters, gamma):
     """
     The logistic gradient descent algorithm.
 
@@ -304,6 +304,48 @@ def logistic regression(y, tx, initial_w, max_iters, gamma)(y, tx, w, gamma):
         loss = calculate_loss_llh(y, tx, w)
         gradient = calculate_gradient_llh(y, tx, w)
         w = w - gamma*gradient
+        
+        ws.append(w)
+        losses.append(loss)
+    
+    return ws, losses
+
+def reg_logistic regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    The logistic gradient descent with penalty algorithm.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+        gamma: float
+
+    Returns:
+        losses: np.array
+        w: np.array
+
+    >>> y = np.c_[[0., 1.]]
+    >>> tx = np.arange(6).reshape(2, 3)
+    >>> w = np.array([[0.1], [0.2], [0.3]])
+    >>> gamma = 0.1
+    >>> loss, w = learning_by_gradient_descent(y, tx, w, gamma)
+    >>> round(loss, 8)
+    0.62137268
+    >>> w
+    array([[0.11037076],
+           [0.17932896],
+           [0.24828716]])
+    """
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        
+        loss = calculate_loss(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
+        gradient = calculate_gradient(y, tx, w) + 2*lambda_*w
+        
+        w = w - gamma * gradient
         
         ws.append(w)
         losses.append(loss)
