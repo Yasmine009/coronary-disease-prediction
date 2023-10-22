@@ -6,25 +6,19 @@ import numpy as np
 from utils import *
 
 
-"""
-Least Squares
-"""
 def least_squares(y, tx):
-    """Calculate the least squares solution.
-       returns mse, and optimal weights.
+    """
+    Calculate the least squares solution and the corresponding loss.
 
     Args:
         y: numpy array of shape (N,), N is the number of samples.
         tx: numpy array of shape (N,D), D is the number of features.
 
     Returns:
-        w: optimal weights, numpy array of shape(D,), D is the number of features.
-        mse: scalar.
+        w: optimal weights.
+        loss: scalar.
 
-    >>> least_squares(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]))
-    (array([ 0.21212121, -0.12121212]), 8.666684749742561e-33)
     """
-    #Do not use use the invert of the (X.T).dot(X) matrix as it might not be invertible
     
     leftHand = (tx.T).dot(y)
     rightHand = (tx.T).dot(tx)
@@ -39,7 +33,8 @@ def least_squares(y, tx):
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
-    """The Gradient Descent (GD) algorithm.
+    """
+    The Gradient Descent (GD) algorithm.
 
     Args:
         y: shape=(N, )
@@ -49,9 +44,10 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         gamma: a scalar denoting the stepsize
 
     Returns:
-        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (2, ), for each iteration of GD
-        losses: a list of length max_iters containing the loss value (scalar) for each iteration of GD
+        w: optimal weights.
+        loss: scalar.
     """
+
     # Define parameters to store w and loss
     w = initial_w
     gradient = np.asarray(compute_gradient(y, tx, w))
@@ -65,7 +61,8 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
 
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
-    """The Stochastic Gradient Descent algorithm (SGD).
+    """
+    The Stochastic Gradient Descent algorithm (SGD).
 
     Args:
         y: shape=(N, )
@@ -76,8 +73,8 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
         gamma: a scalar denoting the stepsize
 
     Returns:
-        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (2, ), for each iteration of SGD
-        losses: a list of length max_iters containing the loss value (scalar) for each iteration of SGD
+        w: optimal weights.
+        loss: scalar.
     """
 
     # Define parameters to store w and loss
@@ -95,7 +92,8 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
     return w, loss
 
 def ridge_regression(y, tx, lambda_):
-    """implement ridge regression.
+    """
+    Ridge regression algorithm.
 
     Args:
         y: numpy array of shape (N,), N is the number of samples.
@@ -103,12 +101,9 @@ def ridge_regression(y, tx, lambda_):
         lambda_: scalar.
 
     Returns:
-        w: optimal weights, numpy array of shape(D,), D is the number of features.
+        w: optimal weights.
+        loss: scalar.
 
-    >>> ridge_regression(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]), 0)
-    array([ 0.21212121, -0.12121212])
-    >>> ridge_regression(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]), 1)
-    array([0.03947092, 0.00319628])
     """
     
     # We take the direct formula from the course
@@ -134,20 +129,9 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         gamma: float
 
     Returns:
-        losses: np.array
-        w: np.array
+        w: optimal weights.
+        loss: scalar.
 
-    >>> y = np.c_[[0., 1.]]
-    >>> tx = np.arange(6).reshape(2, 3)
-    >>> w = np.array([[0.1], [0.2], [0.3]])
-    >>> gamma = 0.1
-    >>> loss, w = learning_by_gradient_descent(y, tx, w, gamma)
-    >>> round(loss, 8)
-    0.62137268
-    >>> w
-    array([[0.11037076],
-           [0.17932896],
-           [0.24828716]])
     """
     w = initial_w
     gradient = compute_gradient_llh(y, tx, w)
@@ -171,21 +155,10 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         gamma: float
 
     Returns:
-        losses: np.array
-        w: np.array
-
-    >>> y = np.c_[[0., 1.]]
-    >>> tx = np.arange(6).reshape(2, 3)
-    >>> w = np.array([[0.1], [0.2], [0.3]])
-    >>> gamma = 0.1
-    >>> loss, w = learning_by_gradient_descent(y, tx, w, gamma)
-    >>> round(loss, 8)
-    0.62137268
-    >>> w
-    array([[0.11037076],
-           [0.17932896],
-           [0.24828716]])
+        w: optimal weights.
+        loss: scalar.
     """
+    
     w = initial_w
     gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
     for n_iter in range(max_iters):

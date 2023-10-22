@@ -106,7 +106,7 @@ def compute_gradient(y, tx, w):
     Returns:
         An array of shape (2, ) (same shape as w), containing the gradient of the loss at w.
     """
-    e = y-(tx.dot(w))
+    e = y- tx.dot(w)
     gradient = -tx.T.dot(e) / len(e)
     
     return gradient
@@ -122,11 +122,10 @@ def compute_stoch_gradient(y, tx, w):
     Returns:
         An array of shape (2, ) (same shape as w), containing the stochastic gradient of the loss at w.
     """
-    e = y-(tx.dot(w))
-    d_w0 = (-1)/np.shape(y)[0]*np.sum(e)
-    d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
+    e = y - tx.dot(w)
+    gradient = -tx.T.dot(e) / len(e)
     
-    return np.array([d_w0, d_w1])
+    return gradient
 
 
 def compute_gradient_llh(y, tx, w):
