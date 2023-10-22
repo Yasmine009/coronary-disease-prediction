@@ -85,8 +85,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
 
     for n_iter in range(max_iters):
 
-        loss = compute_loss_mse(y, tx, w)
-        
         # Define initial gradient and iterate over the the batch
         gradient = np.zeros(2)
         for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size):
@@ -194,6 +192,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         w = w - gamma * gradient
         gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
 
-    loss = compute_loss_llh(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
+    loss = compute_loss_llh(y, tx, w)
     return w, loss
 
