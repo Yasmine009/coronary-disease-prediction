@@ -4,6 +4,23 @@ Repository of all functions of the project 1
 import numpy as np
 import csv
 
+
+def sigmoid(t):
+    """apply sigmoid function on t.
+
+    Args:
+        t: scalar or numpy array
+
+    Returns:
+        scalar or numpy array
+
+    >>> sigmoid(np.array([0.1]))
+    array([0.52497919])
+    >>> sigmoid(np.array([0.1, 0.1]))
+    array([0.52497919, 0.52497919])
+    """
+    sig = 1/(1 + np.exp(-t))
+    return sig
 """
 Cost functions
 """
@@ -12,8 +29,8 @@ def compute_loss_mse(y, tx, w):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        w: shape=(2,). The vector of model parameters.
+        tx: shape=(N,D)
+        w: shape=(D,). The vector of model parameters.
 
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
@@ -26,8 +43,8 @@ def compute_loss_mae(y, tx, w):
 
     Args:
         y: numpy array of shape=(N, )
-        tx: numpy array of shape=(N,2)
-        w: numpy array of shape=(2,). The vector of model parameters.
+        tx: numpy array of shape=(N,D)
+        w: numpy array of shape=(D,). The vector of model parameters.
 
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
@@ -40,14 +57,37 @@ def compute_loss_rmse(y, tx, w):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        w: shape=(2,). The vector of model parameters.
+        tx: shape=(N,D)
+        w: shape=(D,). The vector of model parameters.
 
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
     
     return np.sqrt(2*compute_loss_mse(y, tx, w))
+
+
+# changer dimensions de y et w
+def calculate_loss_llh(y, tx, w):
+    """Compute the cost by negative log likelihood.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+
+    Returns:
+        a non-negative loss
+    """
+    assert y.shape[0] == tx.shape[0]
+    assert tx.shape[1] == w.shape[0]
+
+    n = len(y)
+    s = sigmoid(tx.dot(w))
+    loss = - (y.T.dot(np.log(s)) + (1-y).T.dot(np.log(1 - s)))
+        
+    return 1/n * np.squeeze(loss)
+
 
 """
 Gradient Descent
@@ -57,17 +97,33 @@ def compute_gradient(y, tx, w):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        w: shape=(2, ). The vector of model parameters.
+        tx: shape=(N,D)
+        w: shape=(D, ). The vector of model parameters.
 
     Returns:
-        An array of shape (2, ) (same shape as w), containing the gradient of the loss at w.
+        An array of shape (D, ) (same shape as w), containing the gradient of the loss at w.
     """
-    e = y-(tx.dot(w))
-    d_w0 = (-1)/np.shape(y)[0]*np.sum(e)
-    d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
-    
-    return np.array([d_w0, d_w1])
+    e = y - (tx.dot(w))
+    N = y.shape[0]
+    gradient = -(1/N) * tx.T.dot(e)
+    return gradient
+
+# changer dimensions
+def calculate_gradient_llh(y, tx, w):
+    """Compute the gradient of negative log likelihood loss.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+
+    Returns:
+        a vector of shape (D, 1)
+
+    """
+    N = y.shape[0]
+    grad = (1/N) * tx.T.dot(sigmoid(tx@w)-y)
+    return grad
 
 
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
@@ -75,24 +131,25 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        tx: shape=(N,D)
+        initial_w: shape=(D, ). The initial guess (or the initialization) for the model parameters
         max_iters: a scalar denoting the total number of iterations of GD
         gamma: a scalar denoting the stepsize
 
     Returns:
-        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (2, ), for each iteration of GD
+        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (D, ), for each iteration of GD
         losses: a list of length max_iters containing the loss value (scalar) for each iteration of GD
     """
     # Define parameters to store w and loss
     ws = [initial_w]
     losses = []
     w = initial_w
+
     for n_iter in range(max_iters):
-        
-        # Computer loss using mse and the gradient
+        # Compute loss using mse 
         loss = compute_loss_mse(y, tx, w)
-        gradient = np.asarray(compute_gradient(y, tx, w))
+        # Compute the gradient
+        gradient = compute_gradient(y, tx, w)
         w = w - gamma*gradient
 
         # store w and loss
@@ -109,17 +166,16 @@ def compute_stoch_gradient(y, tx, w):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        w: shape=(2, ). The vector of model parameters.
+        tx: shape=(N,D)
+        w: shape=(D, ). The vector of model parameters.
 
     Returns:
-        An array of shape (2, ) (same shape as w), containing the stochastic gradient of the loss at w.
+        An array of shape (D, ) (same shape as w), containing the stochastic gradient of the loss at w.
     """
-    e = y-(tx.dot(w))
-    d_w0 = (-1)/np.shape(y)[0]*np.sum(e)
-    d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
-    
-    return np.array([d_w0, d_w1])
+    e = y - (tx.dot(w))
+    N = y.shape[0]
+    stoch_gradient = -(1/N) * tx.T.dot(e)
+    return stoch_gradient
 
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
@@ -127,14 +183,14 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        tx: shape=(N,D)
+        initial_w: shape=(D, ). The initial guess (or the initialization) for the model parameters
         batch_size: (default=1) a scalar denoting the number of data points in a mini-batch used for computing the stochastic gradient
         max_iters: a scalar denoting the total number of iterations of SGD
         gamma: a scalar denoting the stepsize
 
     Returns:
-        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (2, ), for each iteration of SGD
+        ws: a list of length max_iters containing the model parameters as numpy arrays of shape (D, ), for each iteration of SGD
         losses: a list of length max_iters containing the loss value (scalar) for each iteration of SGD
     """
 
@@ -144,21 +200,15 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
     w = initial_w
 
     for n_iter in range(max_iters):
+        for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size=batch_size):
+            loss = compute_loss_mse(minibatch_y, minibatch_tx, w)
+            stoch_gradient = compute_stoch_gradient(minibatch_y, minibatch_tx, w=w)
+            w = w - gamma * stoch_gradient
 
-        loss = compute_loss_mse(y, tx, w)
-        
-        # Define initial gradient and iterate over the the batch
-        gradient = np.zeros(2)
-        for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size):
-            gradient+=compute_stoch_gradient(minibatch_y, minibatch_tx, w)
-            w = w - gamma*(1/abs(batch_size))*gradient
-            
             # store w and loss
             ws.append(w)
             losses.append(loss)
-        
-        # Do we return only the last W vector of the iteration (same thing for the ? 
-        
+
     return ws, losses
 
 """
@@ -176,20 +226,19 @@ def least_squares(y, tx):
         w: optimal weights, numpy array of shape(D,), D is the number of features.
         mse: scalar.
 
-    >>> least_squares(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]))
-    (array([ 0.21212121, -0.12121212]), 8.666684749742561e-33)
     """
-    #Do not use use the invert of the (X.T).dot(X) matrix as it might not be invertible
+    # Do not use use the invert of the (X.T).dot(X) matrix as it might not be invertible
     
     leftHand = (tx.T).dot(y)
     rightHand = (tx.T).dot(tx)
-    
     w = np.linalg.solve(rightHand, leftHand)
 
-    #Compute loss as in the course example
-    loss = 1/2*len(y)*((y-tx.dot(w)).T).dot(y-tx.dot(w))
+    # Compute loss as in the course example
+    N = len(y)
+    e = y - np.dot(tx, w)
+    mse = (1 / (2 * N)) * np.dot(e.T, e)
     
-    return w, loss
+    return w, mse
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression.
@@ -202,18 +251,86 @@ def ridge_regression(y, tx, lambda_):
     Returns:
         w: optimal weights, numpy array of shape(D,), D is the number of features.
 
-    >>> ridge_regression(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]), 0)
-    array([ 0.21212121, -0.12121212])
-    >>> ridge_regression(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]), 1)
-    array([0.03947092, 0.00319628])
     """
     
     # We take the direct formula from the course
     # Note that the inverse is guaranteed to exist
-    lambda_1 = lambda_*2*tx.shape[0]
-    w = np.linalg.inv(np.add((tx.T).dot(tx), lambda_1*np.identity(tx.shape[1]))).dot(tx.T).dot(y)
+    D = tx.shape[1]
+    N = tx.shape[0]
+    lambda_prime = lambda_ * 2 * N
+    w = np.linalg.inv(tx.T @ tx + (lambda_prime*np.identity(D))).dot(tx.T).dot(y)
+
     return w
 
+
+# changer dimensions
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    """
+    The logistic gradient descent algorithm.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+        gamma: float
+
+    Returns:
+        losses: np.array
+        w: np.array
+
+
+    """
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        
+        loss = calculate_loss_llh(y, tx, w)
+        gradient = calculate_gradient_llh(y, tx, w)
+        w = w - gamma*gradient
+        
+        ws.append(w)
+        losses.append(loss)
+    
+    return ws, losses
+
+
+# changer dimensions
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    The logistic gradient descent with penalty algorithm.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        w:  shape=(D, 1)
+        gamma: float
+
+    Returns:
+        losses: np.array
+        w: np.array
+
+    """
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        
+        loss = calculate_loss(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
+        gradient = calculate_gradient(y, tx, w) + 2*lambda_*w
+        
+        w = w - gamma * gradient
+        
+        ws.append(w)
+        losses.append(loss)
+    
+    return ws, losses
+
+
+
+# remove helpers functions
 
 def load_csv_data(data_path, sub_sample=False):
     """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
