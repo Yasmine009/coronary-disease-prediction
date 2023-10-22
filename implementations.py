@@ -5,6 +5,38 @@ import numpy as np
 
 from utils import *
 
+
+"""
+Least Squares
+"""
+def least_squares(y, tx):
+    """Calculate the least squares solution.
+       returns mse, and optimal weights.
+
+    Args:
+        y: numpy array of shape (N,), N is the number of samples.
+        tx: numpy array of shape (N,D), D is the number of features.
+
+    Returns:
+        w: optimal weights, numpy array of shape(D,), D is the number of features.
+        mse: scalar.
+
+    >>> least_squares(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]))
+    (array([ 0.21212121, -0.12121212]), 8.666684749742561e-33)
+    """
+    #Do not use use the invert of the (X.T).dot(X) matrix as it might not be invertible
+    
+    leftHand = (tx.T).dot(y)
+    rightHand = (tx.T).dot(tx)
+    
+    w = np.linalg.solve(rightHand, leftHand)
+
+    #Compute loss as in the course example
+    loss = 1/2*len(y)*((y-tx.dot(w)).T).dot(y-tx.dot(w))
+    
+    return w, loss
+
+
 def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """The Gradient Descent (GD) algorithm.
 
@@ -21,10 +53,11 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """
     # Define parameters to store w and loss
     w = initial_w
+    gradient = np.asarray(compute_gradient(y, tx, w))
     for n_iter in range(max_iters):
         # Computer loss using mse and the gradient
-        gradient = np.asarray(compute_gradient(y, tx, w))
         w = w - gamma*gradient
+        gradient = np.asarray(compute_gradient(y, tx, w))
 
     loss = compute_loss_mse(y, tx, w)
     return w, loss
@@ -118,11 +151,10 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
            [0.24828716]])
     """
     w = initial_w
-
+    gradient = compute_gradient_llh(y, tx, w)
     for n_iter in range(max_iters):
-        
-        gradient = compute_gradient_llh(y, tx, w)
         w = w - gamma*gradient
+        gradient = compute_gradient_llh(y, tx, w)
     
     loss = compute_loss_llh(y, tx, w)
     return w, loss
@@ -156,12 +188,11 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
            [0.24828716]])
     """
     w = initial_w
-
+    gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
     for n_iter in range(max_iters):
-        
-        gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
         w = w - gamma * gradient
-    
+        gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
+
     loss = compute_loss_llh(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
     return w, loss
 

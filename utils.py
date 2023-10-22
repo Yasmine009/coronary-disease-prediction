@@ -154,35 +154,6 @@ def compute_gradient_llh(y, tx, w):
     s = sigmoid(tx.dot(w))
     return tx.T.dot(s-y)*(1/n)
 
-"""
-Least Squares
-"""
-def least_squares(y, tx):
-    """Calculate the least squares solution.
-       returns mse, and optimal weights.
-
-    Args:
-        y: numpy array of shape (N,), N is the number of samples.
-        tx: numpy array of shape (N,D), D is the number of features.
-
-    Returns:
-        w: optimal weights, numpy array of shape(D,), D is the number of features.
-        mse: scalar.
-
-    >>> least_squares(np.array([0.1,0.2]), np.array([[2.3, 3.2], [1., 0.1]]))
-    (array([ 0.21212121, -0.12121212]), 8.666684749742561e-33)
-    """
-    #Do not use use the invert of the (X.T).dot(X) matrix as it might not be invertible
-    
-    leftHand = (tx.T).dot(y)
-    rightHand = (tx.T).dot(tx)
-    
-    w = np.linalg.solve(rightHand, leftHand)
-
-    #Compute loss as in the course example
-    loss = 1/2*len(y)*((y-tx.dot(w)).T).dot(y-tx.dot(w))
-    
-    return w, loss
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
