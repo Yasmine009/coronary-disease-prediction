@@ -32,7 +32,8 @@ def least_squares(y, tx):
     w = np.linalg.solve(rightHand, leftHand)
 
     #Compute loss as in the course example
-    loss = 1/2*len(y)*((y-tx.dot(w)).T).dot(y-tx.dot(w))
+    e = y-tx.dot(w)
+    loss = 1/2* np.mean(e**2)
     
     return w, loss
 

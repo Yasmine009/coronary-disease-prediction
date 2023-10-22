@@ -34,7 +34,8 @@ def compute_loss_mse(y, tx, w):
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
-    return (1/2*len(y))*np.sum((y-tx.dot(w))**2)
+    e = y-(tx.dot(w))
+    return (1 / 2 * np.mean(e**2))
 
 
 def compute_loss_mae(y, tx, w):
@@ -48,7 +49,8 @@ def compute_loss_mae(y, tx, w):
     Returns:
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
-    return np.mean(np.abs(y-tx.dot(w)))
+    e = y-(tx.dot(w))
+    return np.mean(np.abs(e))
 
 
 def compute_loss_rmse(y, tx, w):
@@ -82,8 +84,6 @@ def compute_loss_llh(y, tx, w):
     >>> round(calculate_loss_llh(y, tx, w), 8)
     1.52429481
     """
-    assert y.shape[0] == tx.shape[0]
-    assert tx.shape[1] == w.shape[0]
 
     n = len(y)
     s = sigmoid(tx.dot(w))
@@ -107,10 +107,9 @@ def compute_gradient(y, tx, w):
         An array of shape (2, ) (same shape as w), containing the gradient of the loss at w.
     """
     e = y-(tx.dot(w))
-    d_w0 = (-1)/np.shape(y)[0]*np.sum(e)
-    d_w1 = (-1)/np.shape(y)[0]*e.dot(tx[:, 1])
+    gradient = -tx.T.dot(e) / len(e)
     
-    return np.array([d_w0, d_w1])
+    return gradient
 
 def compute_stoch_gradient(y, tx, w):
     """Compute a stochastic gradient at w from just few examples n and their corresponding y_n labels.
