@@ -14,10 +14,6 @@ def sigmoid(t):
     Returns:
         scalar or numpy array
 
-    >>> sigmoid(np.array([0.1]))
-    array([0.52497919])
-    >>> sigmoid(np.array([0.1, 0.1]))
-    array([0.52497919, 0.52497919])
     """
     sig = 1/(1 + np.exp(-t))
     return sig
@@ -82,11 +78,11 @@ def calculate_loss_llh(y, tx, w):
     assert y.shape[0] == tx.shape[0]
     assert tx.shape[1] == w.shape[0]
 
-    n = len(y)
+    N = len(y)
     s = sigmoid(tx.dot(w))
     loss = - (y.T.dot(np.log(s)) + (1-y).T.dot(np.log(1 - s)))
         
-    return 1/n * np.squeeze(loss)
+    return (1/N) * np.squeeze(loss)
 
 
 """
@@ -178,7 +174,7 @@ def compute_stoch_gradient(y, tx, w):
     return stoch_gradient
 
 
-def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
+def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     """The Stochastic Gradient Descent algorithm (SGD).
 
     Args:
@@ -200,7 +196,7 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
     w = initial_w
 
     for n_iter in range(max_iters):
-        for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size=batch_size):
+        for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size=1):
             loss = compute_loss_mse(minibatch_y, minibatch_tx, w)
             stoch_gradient = compute_stoch_gradient(minibatch_y, minibatch_tx, w=w)
             w = w - gamma * stoch_gradient
@@ -285,11 +281,10 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     w = initial_w
 
     for n_iter in range(max_iters):
-        
         loss = calculate_loss_llh(y, tx, w)
         gradient = calculate_gradient_llh(y, tx, w)
         w = w - gamma*gradient
-        
+        # store w and loss
         ws.append(w)
         losses.append(loss)
     
@@ -317,70 +312,15 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     w = initial_w
 
     for n_iter in range(max_iters):
-        
-        loss = calculate_loss(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
-        gradient = calculate_gradient(y, tx, w) + 2*lambda_*w
-        
+        loss = calculate_loss_llh(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
+        gradient = calculate_gradient_llh(y, tx, w) + 2*lambda_*w
         w = w - gamma * gradient
-        
+        # store w and loss
         ws.append(w)
         losses.append(loss)
     
     return ws, losses
-
-
-
-# remove helpers functions
-
-def load_csv_data(data_path, sub_sample=False):
-    """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
-    y = np.genfromtxt(data_path, delimiter=",", skip_header=1, dtype=str, usecols=1)
-    x = np.genfromtxt(data_path, delimiter=",", skip_header=1)
-    ids = x[:, 0].astype(np.int)
-    input_data = x[:, 2:]
-
-    # convert class labels from strings to binary (-1,1)
-    yb = np.ones(len(y))
-    yb[np.where(y == "b")] = -1
-
-    # sub-sample
-    if sub_sample:
-        yb = yb[::50]
-        input_data = input_data[::50]
-        ids = ids[::50]
-
-    return yb, input_data, ids
-
-def create_csv_submission(ids, y_pred, name):
-    """
-    Creates an output file in .csv format for submission to Kaggle or AIcrowd
-    Arguments: ids (event ids associated with each prediction)
-               y_pred (predicted class labels)
-               name (string name of .csv output file to be created)
-    """
-    with open(name, "w") as csvfile:
-        fieldnames = ["Id", "Prediction"]
-        writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
-        writer.writeheader()
-        for r1, r2 in zip(ids, y_pred):
-            writer.writerow({"Id": int(r1), "Prediction": int(r2)})
-
-def standardize(x):
-    """Standardize the original data set."""
-    mean_x = np.mean(x)
-    x = x - mean_x
-    std_x = np.std(x)
-    x = x / std_x
-    return x, mean_x, std_x
-
-
-def build_model_data(height, weight):
-    """Form (y,tX) to get regression data in matrix form."""
-    y = weight
-    x = height
-    num_samples = len(y)
-    tx = np.c_[np.ones(num_samples), x]
-    return y, tx
+   
 
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
