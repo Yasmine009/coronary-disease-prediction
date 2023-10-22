@@ -20,19 +20,14 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         losses: a list of length max_iters containing the loss value (scalar) for each iteration of GD
     """
     # Define parameters to store w and loss
-    losses = []
     w = initial_w
     for n_iter in range(max_iters):
-        
         # Computer loss using mse and the gradient
-        loss = compute_loss_mse(y, tx, w)
         gradient = np.asarray(compute_gradient(y, tx, w))
         w = w - gamma*gradient
 
-        # store w and loss
-        losses.append(loss)
-
-    return w, losses[max_iters-1]
+    loss = compute_loss_mse(y, tx, w)
+    return w, loss
 
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
@@ -52,7 +47,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
     """
 
     # Define parameters to store w and loss
-    losses = []
     w = initial_w
 
     for n_iter in range(max_iters):
@@ -65,12 +59,8 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
             gradient+=compute_stoch_gradient(minibatch_y, minibatch_tx, w)
             w = w - gamma*(1/abs(batch_size))*gradient
             
-            # store w and loss
-            losses.append(loss)
-        
-        # Do we return only the last W vector of the iteration (same thing for the ? 
-        
-    return w, losses[max_iters-1]
+    loss = compute_loss_mse(y, tx, w)
+    return w, loss
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression.
@@ -127,18 +117,15 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
            [0.17932896],
            [0.24828716]])
     """
-    losses = []
     w = initial_w
 
     for n_iter in range(max_iters):
         
-        loss = compute_loss_llh(y, tx, w)
         gradient = compute_gradient_llh(y, tx, w)
         w = w - gamma*gradient
-        
-        losses.append(loss)
     
-    return w, losses[max_iters-1]
+    loss = compute_loss_llh(y, tx, w)
+    return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
@@ -168,17 +155,13 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
            [0.17932896],
            [0.24828716]])
     """
-    losses = []
     w = initial_w
 
     for n_iter in range(max_iters):
         
-        loss = compute_loss_llh(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
         gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
-        
         w = w - gamma * gradient
-        
-        losses.append(loss)
     
-    return w, losses[max_iters-1]
+    loss = compute_loss_llh(y, tx, w) + lambda_*np.squeeze(w.T.dot(w))
+    return w, loss
 
