@@ -20,7 +20,6 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         losses: a list of length max_iters containing the loss value (scalar) for each iteration of GD
     """
     # Define parameters to store w and loss
-    ws = [initial_w]
     losses = []
     w = initial_w
     for n_iter in range(max_iters):
@@ -31,10 +30,9 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         w = w - gamma*gradient
 
         # store w and loss
-        ws.append(w)
         losses.append(loss)
 
-    return ws, losses
+    return w, losses[max_iters-1]
 
 
 def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
@@ -54,7 +52,6 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
     """
 
     # Define parameters to store w and loss
-    ws = [initial_w]
     losses = []
     w = initial_w
 
@@ -69,12 +66,11 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
             w = w - gamma*(1/abs(batch_size))*gradient
             
             # store w and loss
-            ws.append(w)
             losses.append(loss)
         
         # Do we return only the last W vector of the iteration (same thing for the ? 
         
-    return ws, losses
+    return w, losses[max_iters-1]
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression.
@@ -97,7 +93,11 @@ def ridge_regression(y, tx, lambda_):
     # Note that the inverse is guaranteed to exist
     lambda_1 = lambda_*2*tx.shape[0]
     w = np.linalg.inv(np.add((tx.T).dot(tx), lambda_1*np.identity(tx.shape[1]))).dot(tx.T).dot(y)
-    return w
+
+    error = y - tx.dot(w)
+    loss = 0.5 * np.mean(error**2)
+    
+    return w, loss
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -108,6 +108,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         y:  shape=(N, 1)
         tx: shape=(N, D)
         w:  shape=(D, 1)
+        max_iters: int
         gamma: float
 
     Returns:
@@ -126,7 +127,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
            [0.17932896],
            [0.24828716]])
     """
-    ws = [initial_w]
     losses = []
     w = initial_w
 
@@ -136,10 +136,9 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         gradient = compute_gradient_llh(y, tx, w)
         w = w - gamma*gradient
         
-        ws.append(w)
         losses.append(loss)
     
-    return ws, losses
+    return w, losses[max_iters-1]
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
@@ -148,7 +147,9 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     Args:
         y:  shape=(N, 1)
         tx: shape=(N, D)
+        lambda_: int
         w:  shape=(D, 1)
+        max_iters: int
         gamma: float
 
     Returns:
@@ -167,7 +168,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
            [0.17932896],
            [0.24828716]])
     """
-    ws = [initial_w]
     losses = []
     w = initial_w
 
@@ -178,8 +178,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         
         w = w - gamma * gradient
         
-        ws.append(w)
         losses.append(loss)
     
-    return ws, losses
+    return w, losses[max_iters-1]
 
