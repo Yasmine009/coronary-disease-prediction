@@ -152,6 +152,25 @@ def compute_gradient_llh(y, tx, w):
     s = sigmoid(tx.dot(w))
     return tx.T.dot(s-y)*(1/n)
 
+def predict_labels_logistic_regression(initial_weights, weights, data):
+    """
+    Generate class predictions given weights, and a test data matrix
+    
+    Args:
+        weights (np.array): weights of the model
+        data (np.array): data to predict
+        
+    Returns:
+        y_pred (np.array): predicted labels
+    """
+    
+    # Predict using sigmoid function
+    y_pred = sigmoid(np.dot(data, weights)+initial_weights)
+
+    # Replace 0 by -1
+    y_pred[np.where(y_pred == 0)] = -1
+
+    return y_pred
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
@@ -177,3 +196,47 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         end_index = min((batch_num + 1) * batch_size, data_size)
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+            
+def split_data(x, y, ratio, seed=1):
+    """
+    Split the dataset based on the split ratio. If ratio is 0.8
+    you will have 80% of your data set dedicated to training
+    and the rest dedicated to testing. If ratio times the number of samples is not round
+    you can use np.floor. Also check the documentation for np.random.permutation,
+    it could be useful.
+
+    Args:
+        x: numpy array of shape (N,), N is the number of samples.
+        y: numpy array of shape (N,).
+        ratio: scalar in [0,1]
+        seed: integer.
+
+    Returns:
+        x_tr: numpy array containing the train data.
+        x_te: numpy array containing the test data.
+        y_tr: numpy array containing the train labels.
+        y_te: numpy array containing the test labels.
+
+    >>> split_data(np.arange(13), np.arange(13), 0.8, 1)
+    (array([ 2,  3,  4, 10,  1,  6,  0,  7, 12,  9]), array([ 8, 11,  5]), array([ 2,  3,  4, 10,  1,  6,  0,  7, 12,  9]), array([ 8, 11,  5]))
+    """
+    # set seed
+    np.random.seed(seed)
+    
+    # Create a permutation of indices
+    permuted_indices = np.random.permutation(len(x))
+    
+    # Split the indices based on the given ratio
+    split_index = int(np.floor(len(x) * ratio))
+    
+    train_indices = permuted_indices[:split_index]
+    test_indices = permuted_indices[split_index:]
+    
+    # Extract data based on the split indices
+    x_tr = x[train_indices]
+    x_te = x[test_indices]
+    
+    y_tr = y[train_indices]
+    y_te = y[test_indices]
+    
+    return x_tr, x_te, y_tr, y_te
