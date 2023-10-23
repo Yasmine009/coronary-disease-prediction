@@ -4,6 +4,7 @@ Repository of all functions of the project 1
 import numpy as np
 
 from utils import *
+from helpers import *
 
 
 def least_squares(y, tx):
@@ -168,3 +169,61 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     loss = compute_loss_llh(y, tx, w)
     return w, loss
 
+def split_data(x, y, ratio, seed=1):
+    """
+    split the dataset based on the split ratio. If ratio is 0.8
+    you will have 80% of your data set dedicated to training
+    and the rest dedicated to testing. If ratio times the number of samples is not round
+    you can use np.floor. Also check the documentation for np.random.permutation,
+    it could be useful.
+
+    Args:
+        x: numpy array of shape (N,), N is the number of samples.
+        y: numpy array of shape (N,).
+        ratio: scalar in [0,1]
+        seed: integer.
+
+    Returns:
+        x_tr: numpy array containing the train data.
+        x_te: numpy array containing the test data.
+        y_tr: numpy array containing the train labels.
+        y_te: numpy array containing the test labels.
+
+    >>> split_data(np.arange(13), np.arange(13), 0.8, 1)
+    (array([ 2,  3,  4, 10,  1,  6,  0,  7, 12,  9]), array([ 8, 11,  5]), array([ 2,  3,  4, 10,  1,  6,  0,  7, 12,  9]), array([ 8, 11,  5]))
+    """
+    # set seed
+    np.random.seed(seed)
+    # ***************************************************
+    # INSERT YOUR CODE HERE
+    # split the data based on the given ratio: TODO
+    # ***************************************************
+    
+    # Create a permutation of indices
+    permuted_indices = np.random.permutation(len(x))
+    
+    # Split the indices based on the given ratio
+    split_index = int(np.floor(len(x) * ratio))
+    
+    train_indices = permuted_indices[:split_index]
+    test_indices = permuted_indices[split_index:]
+    
+    # Extract data based on the split indices
+    x_tr = x[train_indices]
+    x_te = x[test_indices]
+    
+    y_tr = y[train_indices]
+    y_te = y[test_indices]
+    
+    return x_tr, x_te, y_tr, y_te
+
+def aicrowd_submission(y_pred, path):
+    """
+    Create a csv file to submit to aicrowd
+    :param y_pred: predictions to submit. Must be of shape (109379, )
+    The ids of the predictions must go from 328135 to 437513. they are generated in this function
+    """
+    indices = np.arange(328135, 437514)
+    if y_pred.shape[0] != 109379:
+        raise ValueError("Error: y_pred must be of shape (109379, )")
+    create_csv_submission(indices, y_pred, path + "submission.csv")
