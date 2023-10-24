@@ -4,6 +4,7 @@ Repository of all functions of the project 1
 import numpy as np
 
 from utils import *
+from helpers import *
 
 
 def least_squares(y, tx):
@@ -38,8 +39,8 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        tx: shape=(N,D)
+        initial_w: shape=(D, ). The initial guess (or the initialization) for the model parameters
         max_iters: a scalar denoting the total number of iterations of GD
         gamma: a scalar denoting the stepsize
 
@@ -66,8 +67,8 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        tx: shape=(N,D)
+        initial_w: shape=(D, ). The initial guess (or the initialization) for the model parameters
         batch_size: (default=1) a scalar denoting the number of data points in a mini-batch used for computing the stochastic gradient
         max_iters: a scalar denoting the total number of iterations of SGD
         gamma: a scalar denoting the stepsize
@@ -138,13 +139,37 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     for n_iter in range(max_iters):
         w = w - gamma*gradient
         gradient = compute_gradient_llh(y, tx, w)
-    
     loss = compute_loss_llh(y, tx, w)
+    return w, loss
+
+def l1_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    Logistic regression with L1 regularization.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        lambda_: float, regularization parameter
+        initial_w: shape=(D, 1)
+        max_iters: int
+        gamma: float
+
+    Returns:
+        w: optimal weights.
+        loss: scalar.
+    """
+    w = initial_w
+    for n_iter in range(max_iters):
+        gradient = compute_gradient_llh(y, tx, w)
+        w = w - gamma * gradient
+        w = np.sign(w) * np.maximum(0, np.abs(w) - gamma * lambda_)
+
+    loss = compute_loss_llh(y, tx, w) + lambda_ * np.sum(np.abs(w))
     return w, loss
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
-    The logistic gradient descent with penalty algorithm.
+    The logistic gradient descent with penalty algorithm (L2 regularization).
 
     Args:
         y:  shape=(N, 1)
@@ -168,3 +193,58 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     loss = compute_loss_llh(y, tx, w)
     return w, loss
 
+def aicrowd_submission(y_pred, path):
+    """
+    Create a csv file to submit to aicrowd
+    :param y_pred: predictions to submit. Must be of shape (109379, )
+    The ids of the predictions must go from 328135 to 437513. they are generated in this function
+    """
+    indices = np.arange(328135, 437514)
+    if y_pred.shape[0] != 109379:
+        raise ValueError("Error: y_pred must be of shape (109379, )")
+    create_csv_submission(indices, y_pred, path + "submission.csv")
+
+def score(y_pred, y_true):
+    """
+        Calculate the F1 score and the precision
+    
+    Args:
+        y_pred (np.array): predicted labels
+        y_true (np.array): true labels
+        
+    Returns:
+        f1_score (float): F1 score
+        precision (float): precision
+    """
+    
+    # True positives
+    tp = np.sum((y_pred == 1) & (y_true == 1))
+    
+    # False positives
+    fp = np.sum((y_pred == 1) & (y_true == -1))
+    
+    # False negatives
+    fn = np.sum((y_pred == -1) & (y_true == 1))
+    
+    # Precision
+    precision = tp / (tp + fp)
+    
+    # Recall
+    recall = tp / (tp + fn)
+    
+    # F1 score
+    f1_score = 2 * precision * recall / (precision + recall)
+    
+    return f1_score, precision
+
+def predict(w,X):
+    """
+    Predict the labels of the data X using the weights of the model
+    :param w: weights of the model
+    :param X: data
+    :return: predicted labels
+    """
+    z = np.dot(X,w)
+    y = sigmoid(z)
+    y_pred = np.where(y>=0.5,1,-1)
+    return y_pred

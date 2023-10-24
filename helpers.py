@@ -4,6 +4,14 @@ import numpy as np
 import os
 
 
+def load_csv_headers(csv_file):
+    with open(csv_file, 'r', newline='') as file:
+    # Create a CSV reader
+        csv_reader = csv.reader(file)
+        # Read the first row (headers)
+        headers = next(csv_reader)
+        return headers
+
 def load_csv_data(data_path, sub_sample=False):
     """
     This function loads the data and returns the respectinve numpy arrays.
@@ -43,17 +51,8 @@ def load_csv_data(data_path, sub_sample=False):
         y_train = y_train[::50]
         x_train = x_train[::50]
         train_ids = train_ids[::50]
-
+    
     return x_train, x_test, y_train, train_ids, test_ids
-
-def standardize(x):
-    """Standardize the original data set."""
-    mean_x = np.mean(x)
-    x = x - mean_x
-    std_x = np.std(x)
-    x = x / std_x
-    return x, mean_x, std_x
-
 
 def build_model_data(height, weight):
     """Form (y,tX) to get regression data in matrix form."""
