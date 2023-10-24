@@ -139,7 +139,6 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     for n_iter in range(max_iters):
         w = w - gamma*gradient
         gradient = compute_gradient_llh(y, tx, w)
-        print(w)
     loss = compute_loss_llh(y, tx, w)
     return w, loss
 

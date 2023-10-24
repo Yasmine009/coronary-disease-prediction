@@ -1,10 +1,121 @@
 import numpy as np
 import matplotlib.pyplot as plt 
+from constants import calculated_variables, unnecessary_variables
 
 """
 Repository for functions useful for preprocessing data
 """
 
+calculated_variables = ['ACTIN11_',
+'ACTIN21_',
+'DROCDY3_',
+'FC60_',
+'FRUTDA1_',
+'FTJUDA1_',
+'GRENDAY_',
+'MAXVO2_',
+'METVL11_',
+'METVL21_',
+'ORNGDAY_',
+'PA1MIN_',
+'PA1VIGM_',
+'PADUR1_',
+'PADUR2_',
+'PAFREQ1_',
+'PAFREQ2_',
+'PAINACT2',
+'PAMIN11_',
+'PAMIN21_',
+'PAMISS1_',
+'PAVIG11_',
+'PAVIG21_',
+'VEGEDA1_',
+'_AGE80',
+'_AGE65YR',
+'_AGEG5YR',
+'_AGE_G',
+'_AIDTST3',
+'_ASTHMS1',
+'_BMI5',
+'_BMI5CAT',
+'_CASTHM1',
+'_CHLDCNT',
+'_CHOLCHK',
+'_DRDXAR1',
+'_DRNKWEK',
+'_DUALCOR',
+'_DUALUSE',
+'_EDUCAG',
+'_FLSHOT6',
+'_FRT16',
+'_FRTLT1',
+'_FRTRESP',
+'_FRUITEX',
+'_FRUTSUM',
+'_HCVU651',
+'_HISPANC',
+'_INCOMG',
+'_LLCPWT',
+'_LMTACT1',
+'_LMTSCL1',
+'_LMTWRK1',
+'_LTASTH1',
+'_MICHD',
+'_MINAC11',
+'_MINAC21',
+'_MISFRTN',
+'_MISVEGN',
+'_MRACE1',
+'_PA30021',
+'_PA150R2',
+'_PA300R2',
+'_PACAT1',
+'_PAINDX1',
+'_PAREC1',
+'_PASTAE1',
+'_PASTRNG',
+'_PNEUMO2',
+'_PRACE1',
+'_RACE',
+'_RACEG21',
+'_RACEGR3',
+'_RACE_G1',
+'_RFBING5',
+'_RFBMI5',
+'_RFCHOL',
+'_RFDRHV5',
+'_RFHLTH',
+'_RFHYPE5',
+'_RFSEAT2',
+'_RFSEAT3',
+'_RFSMOK3',
+'_SMOKER3',
+'_TOTINDA',
+'_VEG23',
+'_VEGESUM',
+'_VEGETEX',
+'_VEGLT1',
+'_VEGRESP']
+
+# Based on https://www.cdc.gov/brfss/annual_data/2015/pdf/codebook15_llcp.pdf these describe PID's, c
+# cellphone or state identification numbers. They are not relevant for the estimation.
+unnecessary_variables = [
+'Id', '_STATE', 'FMONTH', 'IDATE', 'IMONTH', 'IDAY', 'IYEAR', 'SEQNO', '_PSU', 
+'DISPCODE',  'CTELENUM', 'PVTRESD1', 'COLGHOUS', 'STATERES', 'CELLFON3', 'CTELNUM1', 'CELLFON2', 'PVTRESD2',
+'CCLGHOUS', 'CSTATE', 'LANDLINE', 'HHADULT', 'CADULT', 'NUMWOMEN', 'NUMMEN' , 'NUMADULT', 'LADULT',          
+]
+
+def unused_features_indices(headers):
+    """
+    Remove unused features 
+    """
+    # features name as dict
+    headers_dict = dict(zip(headers, range(len(headers))))
+    unused_features = [headers_dict[key] for key in unnecessary_variables]
+    return unused_features
+
+def filter_features(features_name):
+    return
 
 def remove_feature(x, cols_excluded):
     """
@@ -16,7 +127,6 @@ def remove_feature(x, cols_excluded):
     Returns:
         f_x: filtered matrix
     """
-
     f_x = np.delete(x, cols_excluded, axis=1)
     return f_x
 
