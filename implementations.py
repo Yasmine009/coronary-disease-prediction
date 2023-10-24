@@ -143,9 +143,34 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     loss = compute_loss_llh(y, tx, w)
     return w, loss
 
+def l1_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """
+    Logistic regression with L1 regularization.
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        lambda_: float, regularization parameter
+        initial_w: shape=(D, 1)
+        max_iters: int
+        gamma: float
+
+    Returns:
+        w: optimal weights.
+        loss: scalar.
+    """
+    w = initial_w
+    for n_iter in range(max_iters):
+        gradient = compute_gradient_llh(y, tx, w)
+        w = w - gamma * gradient
+        w = np.sign(w) * np.maximum(0, np.abs(w) - gamma * lambda_)
+
+    loss = compute_loss_llh(y, tx, w) + lambda_ * np.sum(np.abs(w))
+    return w, loss
+
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """
-    The logistic gradient descent with penalty algorithm.
+    The logistic gradient descent with penalty algorithm (L2 regularization).
 
     Args:
         y:  shape=(N, 1)
