@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt 
-from constants import calculated_variables, unnecessary_variables
 
 """
 Repository for functions useful for preprocessing data
