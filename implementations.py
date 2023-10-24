@@ -179,3 +179,36 @@ def aicrowd_submission(y_pred, path):
     if y_pred.shape[0] != 109379:
         raise ValueError("Error: y_pred must be of shape (109379, )")
     create_csv_submission(indices, y_pred, path + "submission.csv")
+
+def score(y_pred, y_true):
+    """
+        Calculate the F1 score and the precision
+    
+    Args:
+        y_pred (np.array): predicted labels
+        y_true (np.array): true labels
+        
+    Returns:
+        f1_score (float): F1 score
+        precision (float): precision
+    """
+    
+    # True positives
+    tp = np.sum((y_pred == 1) & (y_true == 1))
+    
+    # False positives
+    fp = np.sum((y_pred == 1) & (y_true == -1))
+    
+    # False negatives
+    fn = np.sum((y_pred == -1) & (y_true == 1))
+    
+    # Precision
+    precision = tp / (tp + fp)
+    
+    # Recall
+    recall = tp / (tp + fn)
+    
+    # F1 score
+    f1_score = 2 * precision * recall / (precision + recall)
+    
+    return f1_score, precision
