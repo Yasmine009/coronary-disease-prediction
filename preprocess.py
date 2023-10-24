@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt 
-from constants import calculated_variables, unnecessary_variables
 
 """
 Repository for functions useful for preprocessing data
@@ -210,3 +209,18 @@ def standardize(x):
     std_x = np.std(x)
     x = x / std_x
     return x, mean_x, std_x
+
+def standardize_std(x):
+    """
+    Standardize the columns of x, might do some other processing after
+        
+    Args:
+        x (np.array): data
+        
+    Returns:
+        s_x: standardized matrix 
+    """
+    
+    s_x, mean, std = standardize(x)
+    
+    return s_x

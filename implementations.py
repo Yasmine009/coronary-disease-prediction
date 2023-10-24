@@ -6,6 +6,7 @@ import numpy as np
 from utils import *
 from helpers import *
 
+import matplotlib.pyplot as plt
 
 def least_squares(y, tx):
     """
@@ -204,6 +205,32 @@ def aicrowd_submission(y_pred, path):
         raise ValueError("Error: y_pred must be of shape (109379, )")
     create_csv_submission(indices, y_pred, path + "submission.csv")
 
+def confusion_matrix(y_pred, y_true):
+    """
+    Calculate the confusion matrix
+    
+    Args:
+        y_pred (np.array): predicted labels
+        y_true (np.array): true labels
+        
+    Returns:
+        confusion_matrix (np.array): confusion matrix
+    """
+    
+    # True positives
+    tp = np.sum((y_pred == 1) & (y_true == 1))
+    
+    # False positives
+    fp = np.sum((y_pred == 1) & (y_true == -1))
+    
+    # False negatives
+    fn = np.sum((y_pred == -1) & (y_true == 1))
+    
+    # True negatives
+    tn = np.sum((y_pred == -1) & (y_true == -1))
+    
+    return np.array([[tn, fp], [fn, tp]])
+
 def score(y_pred, y_true):
     """
         Calculate the F1 score and the precision
@@ -217,25 +244,37 @@ def score(y_pred, y_true):
         precision (float): precision
     """
     
-    # True positives
-    tp = np.sum((y_pred == 1) & (y_true == 1))
-    
-    # False positives
-    fp = np.sum((y_pred == 1) & (y_true == -1))
-    
-    # False negatives
-    fn = np.sum((y_pred == -1) & (y_true == 1))
-    
-    # Precision
-    precision = tp / (tp + fp)
-    
-    # Recall
-    recall = tp / (tp + fn)
-    
-    # F1 score
-    f1_score = 2 * precision * recall / (precision + recall)
-    
+    # Calculate the confusion matrix
+    cm = confusion_matrix(y_pred, y_true)
+
+    # Calculate the F1 score
+    f1_score = 2*cm[1,1]/(2*cm[1,1] + cm[0,1] + cm[1,0])
+
+    # Calculate the precision
+    precision = cm[1,1]/(cm[1,1] + cm[0,1])
+
     return f1_score, precision
+
+def plot_results(y_pred, y_true):
+    """
+    Plot the results of the predictions
+    :param y_pred: predicted labels
+    :param y_true: true labels
+    """
+    f1_score, precision = score(y_pred, y_true)
+    print("F1 score: ", f1_score)
+    print("Precision: ", precision)
+
+    # Plot confusion matrix
+    plt.figure(figsize=(8, 8))
+    plt.title("Confusion matrix")
+    plt.imshow(confusion_matrix(y_true, y_pred), cmap=plt.cm.plasma)
+    plt.colorbar()
+    plt.xlabel('Predicted label')
+    plt.ylabel('True label')
+    plt.xticks([-1, 1], ['No Stroke', 'Stroke'])
+    plt.yticks([-1, 1], ['No Stroke', 'Stroke'])
+    plt.show()
 
 def predict(w,X):
     """
@@ -248,3 +287,30 @@ def predict(w,X):
     y = sigmoid(z)
     y_pred = np.where(y>=0.5,1,-1)
     return y_pred
+
+
+class KNN:
+    def __init__(self, k=3):
+        self.k = k
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
+
+    def euclidean_distance(self, x1, x2):
+        return np.sqrt(np.sum((x1 - x2) ** 2))
+
+    def predict(self, X):
+        y_pred = [self._predict(x) for x in X]
+        return np.array(y_pred)
+
+    def _predict(self, x):
+        # Compute distances between x and all examples in the training set
+        distances = [self.euclidean_distance(x, x_train) for x_train in self.X_train]
+        # Sort by distance and return indices of the first k neighbors
+        k_indices = np.argsort(distances)[:self.k]
+        # Extract the labels of the k nearest neighbor training samples
+        k_nearest_labels = [self.y_train[i] for i in k_indices]
+        # Return the most common class label
+        most_common = np.bincount(k_nearest_labels).argmax()
+        return most_common
