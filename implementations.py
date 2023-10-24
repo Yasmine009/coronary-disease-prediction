@@ -212,3 +212,15 @@ def score(y_pred, y_true):
     f1_score = 2 * precision * recall / (precision + recall)
     
     return f1_score, precision
+
+def predict(w,X):
+    """
+    Predict the labels of the data X using the weights of the model
+    :param w: weights of the model
+    :param X: data
+    :return: predicted labels
+    """
+    z = np.dot(X,w)
+    y = sigmoid(z)
+    y_pred = np.where(y>=0.5,1,-1)
+    return y_pred
