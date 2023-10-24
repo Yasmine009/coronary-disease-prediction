@@ -39,8 +39,8 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        tx: shape=(N,D)
+        initial_w: shape=(D, ). The initial guess (or the initialization) for the model parameters
         max_iters: a scalar denoting the total number of iterations of GD
         gamma: a scalar denoting the stepsize
 
@@ -67,8 +67,8 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
 
     Args:
         y: shape=(N, )
-        tx: shape=(N,2)
-        initial_w: shape=(2, ). The initial guess (or the initialization) for the model parameters
+        tx: shape=(N,D)
+        initial_w: shape=(D, ). The initial guess (or the initialization) for the model parameters
         batch_size: (default=1) a scalar denoting the number of data points in a mini-batch used for computing the stochastic gradient
         max_iters: a scalar denoting the total number of iterations of SGD
         gamma: a scalar denoting the stepsize
