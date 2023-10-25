@@ -179,7 +179,7 @@ def filter_cols(x, threshold):
             doesn't contain any 0 standard deviation
     """
     
-    f_x = x
+    f_x = x.copy()
     error_matrix = np.isnan(x)
     
     #Identify indices of the columns with more than threshold percentage of NaN values
@@ -201,14 +201,14 @@ def filter_cols(x, threshold):
 
 def standardize(x):
     """
-    Standardize the data set x
+    Standardize the data set x in each column and return the standardized matrix, the mean and the standard deviation
     """
 
-    mean_x = np.mean(x)
-    x = x - mean_x
-    std_x = np.std(x)
-    x = x / std_x
-    return x, mean_x, std_x
+    mean = np.mean(x, axis=0)
+    std = np.std(x, axis=0)
+    s_x = (x - mean) / std
+
+    return s_x, mean, std
 
 def standardize_std(x):
     """
