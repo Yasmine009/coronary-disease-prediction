@@ -194,6 +194,39 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     loss = compute_loss_llh(y, tx, w)
     return w, loss
 
+# reg_logistic_regression but we add a check to see whether the loss is decreasing
+def reg_logistic_regression_v2(y, tx, lambda_, initial_w, max_iters, gamma, threshold=1e-8):
+    """
+    The logistic gradient descent with penalty algorithm (L2 regularization).
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        lambda_: int
+        w:  shape=(D, 1)
+        max_iters: int
+        gamma: float
+
+    Returns:
+        w: optimal weights.
+        loss: scalar.
+    """
+    
+    w = initial_w
+    loss_prev = compute_loss_llh(y, tx, w)
+    gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
+    for n_iter in range(max_iters):
+        w = w - gamma * gradient
+        gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
+        loss = compute_loss_llh(y, tx, w)
+        if (n_iter > 0) & ((loss_prev - loss) < threshold):
+            break
+        loss_prev = loss
+            
+    return w, loss
+
+
+
 def aicrowd_submission(y_pred, path):
     """
     Create a csv file to submit to aicrowd
@@ -314,3 +347,124 @@ class KNN:
         # Return the most common class label
         most_common = np.bincount(k_nearest_labels).argmax()
         return most_common
+    
+
+def grid_search(lambda_values, gamma_values, y_training, x_training, y_validation, x_validation, max_iters=1e5, threshold=1e-8, show_plot=True):
+    """
+    Perform a grid search to find the best hyperparameters for the logistic regression model with L2 regularization.
+    The criteria is the F1 score.
+
+    :param lambda_values: list of values for the regularization parameter
+    :param gamma_values: list of values for the learning rate
+    :param y_training: labels of the training set
+    :param x_training: data of the training set
+    :param y_validation: labels of the validation set
+    :param x_validation: data of the validation set
+    :param max_iters: maximum number of iterations for the gradient descent
+    :param threshold: threshold for the stopping criterion
+    :param show_plot: whether to show the plot of the results
+
+    :return: best_lambda, best_gamma, best_f1score
+    """
+
+    # Initialize variables to store the best hyperparameters and corresponding results
+    best_lambda = None
+    best_gamma = None
+    best_f1score = 0  # Initialize with a low value
+
+    # Initialize a dictionary to store f1scores for different combinations
+    f1scores = {}
+
+    # Loop over all combinations of hyperparameters
+    for lambda_ in lambda_values:
+        for gamma in gamma_values:
+            # Initialize weights
+            w_initial = np.zeros(x_training.shape[1])
+            
+            # Train the model with current hyperparameters
+            w, loss = reg_logistic_regression_v2(y_training, x_training, lambda_, w_initial, int(max_iters), gamma, threshold=threshold)
+            
+            # Calculate the accuracy for the training set and the validation set
+            y_validation_pred = predict(w, x_validation)
+
+            f1score, precision = score(y_validation_pred, y_validation)
+            
+            # Store the f1score for this combination
+            f1scores[(lambda_, gamma)] = f1score
+
+            # Check if the current model has a higher f1score than the best model so far
+            if f1score > best_f1score:
+                best_f1score = f1score
+                best_lambda = lambda_
+                best_gamma = gamma
+
+    if show_plot:
+        # Create a color gradient plot of f1scores
+        f1score_matrix = np.zeros((len(lambda_values), len(gamma_values)))
+        for i, lambda_ in enumerate(lambda_values):
+            for j, gamma in enumerate(gamma_values):
+                f1score_matrix[i, j] = f1scores[(lambda_, gamma)]
+
+        plt.figure(figsize=(8, 6))
+        c = plt.pcolormesh(gamma_values, lambda_values, f1score_matrix, cmap='viridis')
+        plt.colorbar(c, label='F1 score')
+        plt.xlabel('Gamma')
+        plt.ylabel('Lambda')
+        plt.title('Grid Search for Hyperparameters')
+        plt.show()
+
+    return best_lambda, best_gamma, best_f1score
+
+def cross_validation(x, y, k_fold,  lambda_, initial_w = 0, max_iters = 100000, gamma = 0, threshold=1e-8):
+    """
+    Cross validation for the logistic regression model with L2 regularization.
+    The criteria is the F1 score.
+
+    :param x: data
+    :param y: labels
+    :param k_fold: number of folds
+    :param lambda_: regularization parameter
+    :param initial_w: initial weights
+    :param max_iters: maximum number of iterations for the gradient descent
+    :param gamma: learning rate
+    :param threshold: threshold for the stopping criterion
+
+    :return: w, loss
+    """
+    # Split the data into k_fold parts
+    x_split = np.array_split(x, k_fold)
+    y_split = np.array_split(y, k_fold)
+
+    # Initialize variables to store the best hyperparameters and corresponding results
+    best_f1score = 0  # Initialize with a low value
+
+    # Loop over all combinations of hyperparameters
+    for i in range(k_fold):
+        # Initialize weights
+        if initial_w == 0:
+            w_0 = np.zeros(x.shape[1])
+        else:
+            w_0 = initial_w
+
+        # Get the training and validation sets
+        x_training = np.concatenate([x_split[j] for j in range(k_fold) if j != i])
+        y_training = np.concatenate([y_split[j] for j in range(k_fold) if j != i])
+        
+        x_validation = x_split[i]
+        y_validation = y_split[i]
+
+        # Train the model with current hyperparameters
+        w, loss = reg_logistic_regression_v2(y_training, x_training, lambda_, w_0, int(max_iters), gamma, threshold)
+
+        # Calculate the accuracy for the training set and the validation set
+        y_validation_pred = predict(w, x_validation)
+
+        f1score, precision = score(y_validation_pred, y_validation)
+
+        # Check if the current model has a higher f1score than the best model so far
+        if f1score > best_f1score:
+            best_f1score = f1score
+            best_w = w
+            best_loss = loss
+
+    return best_w, best_loss
