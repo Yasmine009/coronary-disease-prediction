@@ -309,7 +309,7 @@ def plot_results(y_pred, y_true):
     plt.yticks([-1, 1], ['No Stroke', 'Stroke'])
     plt.show()
 
-def predict(w,X):
+def predict(w,X, threshold=0.8):
     """
     Predict the labels of the data X using the weights of the model
     :param w: weights of the model
@@ -318,7 +318,7 @@ def predict(w,X):
     """
     z = np.dot(X,w)
     y = sigmoid(z)
-    y_pred = np.where(y>=0.5,1,-1)
+    y_pred = np.where(y>=threshold,1,-1)
     return y_pred
 
 
