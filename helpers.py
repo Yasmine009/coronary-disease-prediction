@@ -83,3 +83,14 @@ def create_csv_submission(ids, y_pred, name):
         writer.writeheader()
         for r1, r2 in zip(ids, y_pred):
             writer.writerow({"Id": int(r1), "Prediction": int(r2)})
+
+def aicrowd_submission(y_pred, path):
+    """
+    Create a csv file to submit to aicrowd
+    :param y_pred: predictions to submit. Must be of shape (109379, )
+    The ids of the predictions must go from 328135 to 437513. they are generated in this function
+    """
+    indices = np.arange(328135, 437514)
+    if y_pred.shape[0] != 109379:
+        raise ValueError("Error: y_pred must be of shape (109379, )")
+    create_csv_submission(indices, y_pred, path + "submission.csv")

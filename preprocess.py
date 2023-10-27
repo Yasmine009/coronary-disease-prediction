@@ -2,9 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 """
-Repository for functions useful for preprocessing data
+Useful for preprocessing data before training
 """
-
 calculated_variables = ['ACTIN11_',
 'ACTIN21_',
 'DROCDY3_',
@@ -167,7 +166,7 @@ def show_NaN_cols(x, x_label):
 def filter_cols(x, threshold):
     """
     Add the mean of the columns with NaN and return indices of the columns to exclude in the regression including
-    those where the standard deviation is equal to 0.
+    those where the standard deviation is equal to 0. Note that it will also remove candidates for outliers
         
     Args:
         x (np.array): data
@@ -179,7 +178,7 @@ def filter_cols(x, threshold):
             doesn't contain any 0 standard deviation
     """
     
-    f_x = x.copy()
+    f_x = np.copy(x)
     error_matrix = np.isnan(x)
     
     #Identify indices of the columns with more than threshold percentage of NaN values
@@ -190,6 +189,9 @@ def filter_cols(x, threshold):
     column_means = np.nanmean(f_x, axis=0)
     f_x[error_matrix] = np.take(column_means, np.where(error_matrix)[1])
     
+    #Remove outliers
+    f_x = remove_outliers(f_x)
+
     #Identify columns with 0 standard deviation
     std_x = np.std(f_x, axis=0)
     rem_cols_std = np.where(std_x == 0)[0]
@@ -199,18 +201,35 @@ def filter_cols(x, threshold):
     
     return f_x, rem_cols
 
+def remove_outliers(tx):
+    """
+    Remove outliers in tx given the IQR method and replace by the mean of the columns.
+        
+    Args:
+        tx (np.array)
+        
+    Returns:
+        x (np.array)
+    """
+
+    x = np.copy(tx)
+    quartiles = np.percentile(x, [25, 75], axis=0)
+    iqr = quartiles[1] - quartiles[0]
+
+    # Define the lower and upper bounds for outliers
+    l = quartiles[0] - 1.5 * iqr
+    u = quartiles[1] + 1.5 * iqr
+
+    # Identify outliers and replace with the mean
+    is_outlier = (x < l) | (x > u)
+    column_means = np.mean(x, axis=0)
+
+    for i in range(x.shape[1]):
+        x[is_outlier[:, i], i] = column_means[i]
+
+    return x
+
 def standardize(x):
-    """
-    Standardize the data set x in each column and return the standardized matrix, the mean and the standard deviation
-    """
-
-    mean = np.mean(x, axis=0)
-    std = np.std(x, axis=0)
-    s_x = (x - mean) / std
-
-    return s_x, mean, std
-
-def standardize_std(x):
     """
     Standardize the columns of x, might do some other processing after
         
@@ -220,7 +239,8 @@ def standardize_std(x):
     Returns:
         s_x: standardized matrix 
     """
-    
-    s_x, mean, std = standardize(x)
-    
+    mean = np.mean(x, axis=0)
+    std = np.std(x, axis=0)
+    s_x = (x - mean) / std
+
     return s_x
