@@ -244,3 +244,15 @@ def standardize(x):
     s_x = (x - mean) / std
 
     return s_x
+
+def build_log(x):
+    """
+    Standardize the columns of x, might do some other processing after
+        
+    Args:
+        x (np.array): data
+        
+    Returns:
+        s_x: standardized matrix 
+    """
+    return np.log(x+1e-10)
