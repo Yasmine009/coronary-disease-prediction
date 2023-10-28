@@ -106,6 +106,11 @@ unnecessary_variables = [
 def unused_features_indices(headers):
     """
     Remove unused features 
+
+    Args:
+        headers (list)
+    Returns:
+        unused_features (list)
     """
     # features name as dict
     headers_dict = dict(zip(headers, range(len(headers))))
@@ -117,7 +122,7 @@ def filter_features(features_name):
 
 def remove_feature(x, cols_excluded):
     """
-    Remove features given our model.
+    Remove features given cols_excluded arrays.
     
     Args:
         x (np.array): data
@@ -231,7 +236,7 @@ def remove_outliers(tx):
 
 def standardize(x):
     """
-    Standardize the columns of x, might do some other processing after
+    Standardize the columns of x
         
     Args:
         x (np.array): data
@@ -247,7 +252,7 @@ def standardize(x):
 
 def build_log(x):
     """
-    Standardize the columns of x, might do some other processing after
+    Apply log processing to each of the columns
         
     Args:
         x (np.array): data

@@ -351,40 +351,13 @@ def predict(w,X, r=0.789):
     Predict the labels of the data X using the weights of the model
     :param w: weights of the model
     :param X: data
+    :param r: prediction threshold
     :return: predicted labels
     """
     z = np.dot(X,w)
     y = sigmoid(z)
     y_pred = np.where(y>=r,1,-1)
     return y_pred
-
-
-class KNN:
-    def __init__(self, k=3):
-        self.k = k
-
-    def fit(self, X, y):
-        self.X_train = X
-        self.y_train = y
-
-    def euclidean_distance(self, x1, x2):
-        return np.sqrt(np.sum((x1 - x2) ** 2))
-
-    def predict(self, X):
-        y_pred = [self._predict(x) for x in X]
-        return np.array(y_pred)
-
-    def _predict(self, x):
-        # Compute distances between x and all examples in the training set
-        distances = [self.euclidean_distance(x, x_train) for x_train in self.X_train]
-        # Sort by distance and return indices of the first k neighbors
-        k_indices = np.argsort(distances)[:self.k]
-        # Extract the labels of the k nearest neighbor training samples
-        k_nearest_labels = [self.y_train[i] for i in k_indices]
-        # Return the most common class label
-        most_common = np.bincount(k_nearest_labels).argmax()
-        return most_common
-    
 
 def grid_search(lambda_values, gamma_values, y_training, x_training, y_validation, x_validation, max_iters=1e5, threshold=1e-8, show_plot=True):
     """
@@ -532,3 +505,31 @@ def l1_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     loss = compute_loss_llh(y, tx, w) + lambda_ * np.sum(np.abs(w))
     return w, loss
+
+# KNN class
+class KNN:
+    def __init__(self, k=3):
+        self.k = k
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
+
+    def euclidean_distance(self, x1, x2):
+        return np.sqrt(np.sum((x1 - x2) ** 2))
+
+    def predict(self, X):
+        y_pred = [self._predict(x) for x in X]
+        return np.array(y_pred)
+
+    def _predict(self, x):
+        # Compute distances between x and all examples in the training set
+        distances = [self.euclidean_distance(x, x_train) for x_train in self.X_train]
+        # Sort by distance and return indices of the first k neighbors
+        k_indices = np.argsort(distances)[:self.k]
+        # Extract the labels of the k nearest neighbor training samples
+        k_nearest_labels = [self.y_train[i] for i in k_indices]
+        # Return the most common class label
+        most_common = np.bincount(k_nearest_labels).argmax()
+        return most_common
+    
