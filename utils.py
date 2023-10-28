@@ -153,6 +153,36 @@ def compute_gradient_llh(y, tx, w):
     s = sigmoid(tx.dot(w))
     return tx.T.dot(s-y)*(1/n)
 
+def reg_logistic_regression_v2(y, tx, lambda_, initial_w, max_iters, gamma, threshold=1e-8):
+    """
+    The logistic gradient descent with penalty algorithm (L2 regularization).
+
+    Args:
+        y:  shape=(N, 1)
+        tx: shape=(N, D)
+        lambda_: int
+        w:  shape=(D, 1)
+        max_iters: int
+        gamma: float
+
+    Returns:
+        w: optimal weights.
+        loss: scalar.
+    """
+    
+    w = initial_w
+    loss_prev = compute_loss_llh(y, tx, w)
+    gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
+    for n_iter in range(max_iters):
+        w = w - gamma * gradient
+        gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
+        loss = compute_loss_llh(y, tx, w)
+        if (n_iter > 0) & ((loss_prev - loss) < threshold):
+            break
+        loss_prev = loss
+            
+    return w, loss
+
 def predict_labels_logistic_regression(initial_weights, weights, data):
     """
     Generate class predictions given weights, and a test data matrix
@@ -244,36 +274,6 @@ def split_data(x, y, ratio, seed=1):
     
     return x_tr, x_te, y_tr, y_te
 
-# reg_logistic_regression but we add a check to see whether the loss is decreasing
-def reg_logistic_regression_v2(y, tx, lambda_, initial_w, max_iters, gamma, threshold=1e-8):
-    """
-    The logistic gradient descent with penalty algorithm (L2 regularization).
-
-    Args:
-        y:  shape=(N, 1)
-        tx: shape=(N, D)
-        lambda_: int
-        w:  shape=(D, 1)
-        max_iters: int
-        gamma: float
-
-    Returns:
-        w: optimal weights.
-        loss: scalar.
-    """
-    
-    w = initial_w
-    loss_prev = compute_loss_llh(y, tx, w)
-    gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
-    for n_iter in range(max_iters):
-        w = w - gamma * gradient
-        gradient = compute_gradient_llh(y, tx, w) + 2*lambda_*w
-        loss = compute_loss_llh(y, tx, w)
-        if (n_iter > 0) & ((loss_prev - loss) < threshold):
-            break
-        loss_prev = loss
-            
-    return w, loss
 
 def confusion_matrix(y_pred, y_true):
     """
