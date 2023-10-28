@@ -11,11 +11,11 @@ Given the annual Behavioral Risk Factor Surveillance System (BRFSS) 2015 data (h
 
 ### Files
 * `preprocessing.py` : functions used to preprocess our dataset
-* `utils.py` : file containing the function used for computation and data visualization (plots, KNN, loss calculations, etc)
-* `feature_selection.ipynb`: a jupyter notebook where we detail each step of the feature selection
-* `helpers.py`: helpers functions mostly used for reading/saveing and parsing files
-* `implementations.py` : file containing graded functions
-* `run.py`: file to reproduce our best result on AICrowd
+* `utils.py` : functions used for computation and data visualization (plots, KNN, loss calculations, etc)
+* `feature_selection.ipynb`: jupyter notebook where we detail each step of the feature selection
+* `helpers.py`: helpers functions mostly used for reading/saving and parsing csv files
+* `implementations.py` : graded functions
+* `run.py`: python script to reproduce our best result on AICrowd
 
 ### Download and extract data
 To download the dataset used, go on: `https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/dataset_files?unique_download_uri=301883&challenge_id=66`. Extract the zip `dataset.zip` in a folder named `data` such that the path from the root of the project folder to the data files `x_train.csv`, `x_test.csv` will be: `data/dataset/x_train.csv`.
