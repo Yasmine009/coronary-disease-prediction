@@ -1,12 +1,10 @@
 """
-Repository of all functions of the project 1
+Graded functions for project 1
 """
 import numpy as np
 
 from utils import *
 from helpers import *
-
-import matplotlib.pyplot as plt
 
 def least_squares(y, tx):
     """

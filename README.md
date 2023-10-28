@@ -18,11 +18,16 @@ Given the annual Behavioral Risk Factor Surveillance System (BRFSS) 2015 data (h
 * `run.py`: file to reproduce our best result on AICrowd
 
 ### Download and extract data
-To download the dataset used, go on: `https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/dataset_files?unique_download_uri=301883&challenge_id=66`. Extract the zip `dataset.zip` in a folder named `data` such that the path from the root of the project folder to the data files `x_train.csv`, `x_test.csv` will be: `data/dataset/x_train.csv`
+To download the dataset used, go on: `https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/dataset_files?unique_download_uri=301883&challenge_id=66`. Extract the zip `dataset.zip` in a folder named `data` such that the path from the root of the project folder to the data files `x_train.csv`, `x_test.csv` will be: `data/dataset/x_train.csv`.
+
+### Requirements
+* python (3.9) or higher
+* numpy (1.23.1)
+* matplotlib (3.5.2)
 
 ### Best model prediction
-To reproduce the best result (and best submission) shown on `https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/leaderboards` simply input the following command in your terminal:
+To reproduce the best result (and best submission) shown on `https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/leaderboards` simply input the following command in your terminal (be careful of your python version):
 
-* python3 run.py
+* python run.py
 
 The best results will then be saved in a csv file under the name `submission.csv`. This file will be saved at the root of the project folder.

@@ -4,7 +4,6 @@ Utils function for computing regressions and other calculations
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def sigmoid(t):
     """apply sigmoid function on t.
 
