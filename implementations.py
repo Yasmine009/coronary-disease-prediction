@@ -83,7 +83,7 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma, batch_size=1):
     for n_iter in range(max_iters):
 
         # Define initial gradient and iterate over the the batch
-        gradient = np.zeros(2)
+        gradient = np.zeros(tx.shape[1])
         for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size):
             gradient+=compute_stoch_gradient(minibatch_y, minibatch_tx, w)
             w = w - gamma*(1/abs(batch_size))*gradient

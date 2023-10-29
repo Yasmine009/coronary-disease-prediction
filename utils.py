@@ -341,8 +341,8 @@ def plot_results(y_pred, y_true):
     plt.colorbar()
     plt.xlabel('Predicted label')
     plt.ylabel('True label')
-    plt.xticks([-1, 1], ['No Stroke', 'Stroke'])
-    plt.yticks([-1, 1], ['No Stroke', 'Stroke'])
+    plt.xticks([-1, 1])
+    plt.yticks([-1, 1])
     plt.show()
 
 def predict(w,X, r=0.789):
