@@ -258,6 +258,7 @@ def build_log(x):
         x (np.array): data
         
     Returns:
-        s_x: standardized matrix 
+        l_x: matrix with columns mapped with log function
     """
-    return np.log(x+1e-10)
+    l_x = np.log(x+1e-10)
+    return l_x
