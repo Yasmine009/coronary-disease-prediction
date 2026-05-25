@@ -17,7 +17,7 @@ Yasmine Chaker, Anders Hominal, Nicolas Filimonov
 * `run.py`: python script to reproduce our best result on AICrowd
 
 ### Download and extract data
-To download the dataset used, go on: `https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/dataset_files?unique_download_uri=301883&challenge_id=66`. Extract the zip `dataset.zip` in a folder named `data` such that the path from the root of the project folder to the data files `x_train.csv`, `x_test.csv` will be: `data/dataset/x_train.csv`.
+To download the dataset used, go on: https://www.aicrowd.com/challenges/epfl-machine-learning-project-1/dataset_files?unique_download_uri=301883&challenge_id=66. Extract the zip `dataset.zip` in a folder named `data` such that the path from the root of the project folder to the data files `x_train.csv`, `x_test.csv` will be: `data/dataset/x_train.csv`.
 
 ### Requirements
 * python (3.9) or higher
