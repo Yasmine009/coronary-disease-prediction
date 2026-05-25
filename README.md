@@ -5,9 +5,8 @@ This project is a part of the EPFL Machine Learning Course CS-433.
 Given the annual Behavioral Risk Factor Surveillance System (BRFSS) 2015 data (https://www.cdc.gov/brfss/annual_data/annual_2015.html), we are given a vector of features collecting the health-related data of a person, and asked to predict whether this situation leads to a coronary heart disease (MICHD) or not. To do this, we use the binary classification techniques we have discussed in the lectures.
 
 ### Contributors
-* Anders Hominal : anders.hominal@gmail.com
-* Nicolas Filimonov : nicolas.filimonov@epfl.ch
-* Yasmine Chaker : yasmine.chaker@epfl.ch
+Yasmine Chaker, Anders Hominal, Nicolas Filimonov 
+ 
 
 ### Files
 * `preprocessing.py` : functions used to preprocess our dataset
